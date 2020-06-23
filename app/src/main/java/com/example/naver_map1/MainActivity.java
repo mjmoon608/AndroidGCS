@@ -11,8 +11,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.geometry.LatLngBounds;
 import com.naver.maps.map.CameraAnimation;
@@ -37,8 +38,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Button map_btn1;
     Button map_btn2;
     Button map_btn3;
+    ToggleButton map_toggle1;
 
-    ArrayList<String> btnTextList = new ArrayList<>();
+//    ArrayList<String> btnTextList = new ArrayList<>();
 
 
     @Override
@@ -46,46 +48,81 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnTextList.add("Basic");
-        btnTextList.add("Terrain");
-        btnTextList.add("Hybrid");
-
-
         map_btn1 = findViewById(R.id.map_btn1);
-//        map_btn1.setText(btnTextList.get(0));
-        map_btn1.setText("Basic");
         map_btn2 = findViewById(R.id.map_btn2);
-//        map_btn2.setText(btnTextList.get(1));
-        map_btn1.setText("Terrain");
         map_btn3 = findViewById(R.id.map_btn3);
-//        map_btn3.setText(btnTextList.get(2));
-        map_btn1.setText("Hybrid");
+        map_toggle1 = findViewById(R.id.map_toggle1);
+
 
         map_btn3.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if (map_btn3.getText() == "Hybrid"){
-                    map_btn1.setText("Basic");
-                    map_btn2.setText("Terrain");
+                Log.v("Text: ", map_btn3.getText().toString());
+                if (map_btn3.getText().toString().equals("SATELITE")){
+                    map_btn1.setText("BASIC");
+                    map_btn2.setText("HYBRID");
                     map_btn1.setVisibility(v.VISIBLE);
                     map_btn2.setVisibility(v.VISIBLE);
                 }
-                else if(map_btn3.getText() == "Basic"){
-                    map_btn1.setText("Terrain");
-                    map_btn2.setText("Hybrid");
+                else if(map_btn3.getText().toString().equals("BASIC")){
+                    map_btn1.setText("HYBRID");
+                    map_btn2.setText("SATELITE");
                     map_btn1.setVisibility(v.VISIBLE);
                     map_btn2.setVisibility(v.VISIBLE);
                 }
-                else if(map_btn3.getText() == "Terrain"){
-                    map_btn1.setText("Basic");
-                    map_btn2.setText("Hybrid");
+                else if(map_btn3.getText().toString().equals("HYBRID")){
+                    map_btn1.setText("BASIC");
+                    map_btn2.setText("SATELITE");
                     map_btn1.setVisibility(v.VISIBLE);
                     map_btn2.setVisibility(v.VISIBLE);
                 }
             }
         });
 
-        // map_btn1, 2 온 클릭 리스너 만들기
+        map_btn1.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if (map_btn1.getText().toString().equals("BASIC")){
+                    map_btn1.setText("HYBRID");
+                    map_btn2.setText("SATELITE");
+                    map_btn3.setText("BASIC");
+                    map_btn1.setVisibility(View.INVISIBLE);
+                    map_btn2.setVisibility(View.INVISIBLE);
+                    naverMap.setMapType(NaverMap.MapType.Basic);
+                }
+                else if (map_btn1.getText().toString().equals("HYBRID")){
+                    map_btn1.setText("BASIC");
+                    map_btn2.setText("SATELITE");
+                    map_btn3.setText("HYBRID");
+                    map_btn1.setVisibility(View.INVISIBLE);
+                    map_btn2.setVisibility(View.INVISIBLE);
+                    naverMap.setMapType(NaverMap.MapType.Hybrid);
+                }
+            }
+        });
+        map_btn2.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if (map_btn2.getText().toString().equals("SATELITE")){
+                    map_btn1.setText("BASIC");
+                    map_btn2.setText("HYBRID");
+                    map_btn3.setText("SATELITE");
+                    map_btn1.setVisibility(View.INVISIBLE);
+                    map_btn2.setVisibility(View.INVISIBLE);
+                    naverMap.setMapType(NaverMap.MapType.Satellite);
+                }
+                else if (map_btn2.getText().toString().equals("HYBRID")){
+                    map_btn1.setText("BASIC");
+                    map_btn2.setText("SATELITE");
+                    map_btn3.setText("HYBRID");
+                    map_btn1.setVisibility(View.INVISIBLE);
+                    map_btn2.setVisibility(View.INVISIBLE);
+                    naverMap.setMapType(NaverMap.MapType.Hybrid);
+                }
+            }
+        });
+
+
 
 
 
@@ -121,9 +158,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(@NonNull NaverMap naverMap) {
         this.naverMap = naverMap;
+        naverMap.setLocationSource(locationSource);
+        naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
 
-        naverMap.setMapType(NaverMap.MapType.Hybrid);
+        naverMap.setMapType(NaverMap.MapType.Satellite);
+        UiSettings uiSettings = naverMap.getUiSettings();
 
+        uiSettings.setCompassEnabled(false);
+        uiSettings.setScaleBarEnabled(false);
+        uiSettings.setZoomControlEnabled(false);
+        uiSettings.setLocationButtonEnabled(true);
+    }
+
+    public  void onToggleClick(View v){
+        boolean isOn = ((ToggleButton) v).isChecked();
+
+        if(isOn){
+            naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_CADASTRAL, true);
+        }else{
+            naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_CADASTRAL, false);
+        }
     }
 
 }
