@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.PointF;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -30,6 +31,8 @@ import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.NaverMapSdk;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.UiSettings;
+import com.naver.maps.map.overlay.InfoWindow;
+import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.util.FusedLocationSource;
 
 import java.util.ArrayList;
@@ -40,14 +43,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
 
+    private boolean isDeleteMode = false;
+
     LocationManager mLocMan;
 
     Button map_btn1;
     Button map_btn2;
     Button map_btn3;
     ToggleButton map_toggle1;
+    ToggleButton marker_delete_toggle;
 
+    Marker kunsan_Uni = new Marker();
+    Marker kunsan_cityHall = new Marker();
+    Marker kunsan_myHome = new Marker();
 
+    InfoWindow infoWindow = new InfoWindow();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +68,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         map_btn2 = findViewById(R.id.map_btn2);
         map_btn3 = findViewById(R.id.map_btn3);
         map_toggle1 = findViewById(R.id.map_toggle1);
+        marker_delete_toggle = findViewById(R.id.marker_delete);
 
-        mLocMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        mLocMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
         map_btn3.setOnClickListener(new Button.OnClickListener() {
@@ -138,6 +149,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         locationSource =
                 new FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE);
+
+
+        // 마커 정보창 생성
+        kunsan_Uni.setTag("군산대학교 정보창");
+        kunsan_Uni.setOnClickListener(overlay -> {
+            if (kunsan_Uni.getInfoWindow() == null) {
+                infoWindow.open(kunsan_Uni);
+            } else {
+                infoWindow.close();
+            }
+            return true;
+        });
+
+        kunsan_cityHall.setTag("군산시청 정보창");
+        kunsan_cityHall.setOnClickListener(overlay -> {
+            if (kunsan_cityHall.getInfoWindow() == null) {
+                infoWindow.open(kunsan_cityHall);
+            } else {
+                infoWindow.close();
+            }
+            return true;
+        });
+
+        kunsan_myHome.setTag("우리 집 정보창");
+        kunsan_myHome.setOnClickListener(overlay -> {
+            if (kunsan_myHome.getInfoWindow() == null) {
+                infoWindow.open(kunsan_myHome);
+            } else {
+                infoWindow.close();
+            }
+            return true;
+        });
+
+
+        infoWindow.setAdapter(new InfoWindow.DefaultTextAdapter(getApplicationContext()) {
+            @NonNull
+            @Override
+            public CharSequence getText(@NonNull InfoWindow infoWindow) {
+                return (CharSequence) infoWindow.getMarker().getTag();
+            }
+        });
+
+
     }
 
     @Override
@@ -160,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull NaverMap naverMap) {
         this.naverMap = naverMap;
 
-        if (!mLocMan.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+        if (!mLocMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             //GPS 꺼져있을때 DIALOG로 위치 켤건지 끌껀지 확인 및 설정이동
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -180,23 +234,74 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             builder.setNegativeButton("아니오",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(getApplicationContext(),"기본 위치인 군산대학교로 이동",Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "기본 위치인 군산대학교로 이동", Toast.LENGTH_LONG).show();
                             CameraUpdate cameraUpdate = CameraUpdate.scrollTo(new LatLng(35.945280, 126.682140));
                             naverMap.moveCamera(cameraUpdate);
                         }
                     });
             builder.show();
 //            Toast.makeText(getApplicationContext(), "GPS 실패", Toast.LENGTH_SHORT).show();
-        }else{
-            //GPS 켜져 있을때 해당 정보 받아와서 map update
-            naverMap.setLocationSource(locationSource);
-            naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
-
         }
+//        else{
+//            //GPS 켜져 있을때 해당 정보 받아와서 map update
+//            naverMap.setLocationSource(locationSource);
+//            naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
+//
+//        }
+        naverMap.setLocationSource(locationSource);
+        naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
 
 
         naverMap.setMapType(NaverMap.MapType.Satellite);
         UiSettings uiSettings = naverMap.getUiSettings();
+
+        kunsan_Uni.setPosition(new LatLng(35.945347, 126.682148));
+        kunsan_Uni.setCaptionText("군산대학교");
+
+        kunsan_cityHall.setPosition(new LatLng(35.967640, 126.736849));
+        kunsan_cityHall.setCaptionText("군산시청");
+
+        kunsan_myHome.setPosition(new LatLng(35.944474, 126.686798));
+        kunsan_myHome.setCaptionText("우리 집");
+
+        kunsan_Uni.setMap(naverMap);
+        kunsan_cityHall.setMap(naverMap);
+        kunsan_myHome.setMap(naverMap);
+
+
+//        // map click evnet로 infoWindow 꺼지도록 설정.
+//        naverMap.setOnMapClickListener((coord, point) -> {
+//            infoWindow.close();
+//        });
+
+        // 맵 터치 이벤트로 해당 좌표에 마커 생성
+        naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener(){
+            @Override
+            public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
+                Marker touch_marker = new Marker();
+
+                double latitude = latLng.latitude;
+                double longitude = latLng.longitude;
+                Toast.makeText(getApplicationContext(), String.format("%f, %f", latitude, longitude), Toast.LENGTH_SHORT).show();
+                touch_marker.setPosition(new LatLng(latitude, longitude));
+                touch_marker.setTag(String.format("%f, %f", latitude, longitude));
+                touch_marker.setMap(naverMap);
+
+                touch_marker.setOnClickListener(overlay -> {
+                    if (!isDeleteMode) {
+                        if (touch_marker.getInfoWindow() == null) {
+                            infoWindow.open(touch_marker);
+                        } else {
+                            infoWindow.close();
+                        }
+                    }else{
+                        touch_marker.setMap(null);
+                    }
+                    return true;
+                });
+
+            }
+        });
 
         uiSettings.setCompassEnabled(false);
         uiSettings.setScaleBarEnabled(false);
@@ -214,4 +319,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    public void onDeleteToggleClick(View view) {
+        boolean isOn = ((ToggleButton) view).isChecked();
+
+        if (isOn){
+            isDeleteMode = true;
+        } else{
+            isDeleteMode = false;
+        }
+    }
 }
