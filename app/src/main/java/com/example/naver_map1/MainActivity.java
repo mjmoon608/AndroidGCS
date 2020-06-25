@@ -1,5 +1,7 @@
 package com.example.naver_map1;
 
+import com.example.naver_map1.ReverseGeocording;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +22,12 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.geometry.LatLngBounds;
 import com.naver.maps.map.CameraAnimation;
@@ -35,7 +43,21 @@ import com.naver.maps.map.overlay.InfoWindow;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.util.FusedLocationSource;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -44,6 +66,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private NaverMap naverMap;
 
     private boolean isDeleteMode = false;
+
+    private final String clientId = "4eg2x03t7o";
+    private final String clientSecret = "2mvLSCRXfYtzuVkpM6vsNhOXyU3NnNb6fBWAIApw";
 
     LocationManager mLocMan;
 
@@ -275,10 +300,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        });
 
         // 맵 터치 이벤트로 해당 좌표에 마커 생성
-        naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener(){
+        naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 Marker touch_marker = new Marker();
+
+//                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
 
                 double latitude = latLng.latitude;
                 double longitude = latLng.longitude;
@@ -287,6 +315,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 touch_marker.setTag(String.format("%f, %f", latitude, longitude));
                 touch_marker.setMap(naverMap);
 
+                // reverse geocording
+                ReverseGeocording reverseGeocording = new ReverseGeocording();
+                reverseGeocording.doInBackground(latitude, longitude);
+//                try {
+//                    String text = URLEncoder.encode(String.format("%f,%f",latitude,longitude), "UTF-8");
+//                    String apiURL = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=" + text;
+//                    URL url = new URL(apiURL);
+//                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//                    con.setRequestMethod("GET");
+//                    con.setRequestProperty("X-Naver-Client-Id", clientId);
+//                    con.setRequestProperty("X-Naver-Client-Secret", clientSecret);
+//                    // response 수신
+//                    int responseCode = con.getResponseCode();
+////                    System.out.println("responseCode=" + responseCode);
+//                    Log.d("HTTP 응답 코드: ", ""+responseCode);
+//                    BufferedReader br;
+//                    if (responseCode == 200) {
+//                        br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+//                    } else {
+//                        br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+//                    }
+//                    String inputLine;
+//                    StringBuffer response = new StringBuffer();
+//                    while ((inputLine = br.readLine()) != null) {
+//                        response.append(inputLine);
+//                    }
+//                    br.close();
+////                    System.out.println(response.toString());
+//                    Log.d("HTTP body: ", response.toString());
+//                } catch (Exception e) {
+//                    System.out.println(e);
+//                    //Log.d()
+//                }
+
                 touch_marker.setOnClickListener(overlay -> {
                     if (!isDeleteMode) {
                         if (touch_marker.getInfoWindow() == null) {
@@ -294,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         } else {
                             infoWindow.close();
                         }
-                    }else{
+                    } else {
                         touch_marker.setMap(null);
                     }
                     return true;
@@ -322,9 +384,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onDeleteToggleClick(View view) {
         boolean isOn = ((ToggleButton) view).isChecked();
 
-        if (isOn){
+        if (isOn) {
             isDeleteMode = true;
-        } else{
+        } else {
             isDeleteMode = false;
         }
     }
