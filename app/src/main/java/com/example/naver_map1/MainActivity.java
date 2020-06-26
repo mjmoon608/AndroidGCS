@@ -95,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         map_toggle1 = findViewById(R.id.map_toggle1);
         marker_delete_toggle = findViewById(R.id.marker_delete);
 
+
+
+
         mLocMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
@@ -310,6 +313,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 double latitude = latLng.latitude;
                 double longitude = latLng.longitude;
+                String coords = Double.toString(latitude) + ","+Double.toString(longitude);
+
                 Toast.makeText(getApplicationContext(), String.format("%f, %f", latitude, longitude), Toast.LENGTH_SHORT).show();
                 touch_marker.setPosition(new LatLng(latitude, longitude));
                 touch_marker.setTag(String.format("%f, %f", latitude, longitude));
@@ -317,7 +322,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 // reverse geocording
                 ReverseGeocording reverseGeocording = new ReverseGeocording();
-                reverseGeocording.doInBackground(latitude, longitude);
+//                reverseGeocording.doInBackground(coords);
+                reverseGeocording.execute(coords);
+
+                //coords 파라미터 값으로 지역을 알 수 없을 땐 Toast메세지로 다른 좌표 찍어달라고 하기
+
+                //네이버 API 요청 성공적으로 받았을 때만 해당 위치에 좌표 찍기.
+
+
 //                try {
 //                    String text = URLEncoder.encode(String.format("%f,%f",latitude,longitude), "UTF-8");
 //                    String apiURL = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=" + text;
