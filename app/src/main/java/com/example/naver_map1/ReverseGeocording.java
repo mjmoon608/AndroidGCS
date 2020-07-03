@@ -3,6 +3,9 @@ package com.example.naver_map1;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,6 +16,8 @@ import java.net.URLEncoder;
 public class ReverseGeocording extends AsyncTask<String, String, String> {
     private static final String clientId = "4eg2x03t7o";
     private static final String clientSecret = "2mvLSCRXfYtzuVkpM6vsNhOXyU3NnNb6fBWAIApw";
+    private MainActivity mainActivity;
+
 //    private double latitude;
 //    private double longitude;
 //    public ReverseGeocording(double latitude, double longitude) {
@@ -48,13 +53,18 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
 //        }
 //    }
 
+    public ReverseGeocording(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+    }
+
     @Override
     protected String doInBackground(String ... coords) {
-        String text = coords[0];
+        String coordText = coords[0];
 
-        
+//        coordText = "127.106363,37.372799";
+
         String result = null;
-        StringBuilder urlBuilder = new StringBuilder("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=" + text + "&sourcecrs=epsg:4326&output=json&orders=addr");
+        StringBuilder urlBuilder = new StringBuilder("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=" + coordText + "&sourcecrs=epsg:4326&output=json&orders=addr");
         try {
 //            String text = URLEncoder.encode(String.format("%f,%f",latitude,longitude), "UTF-8");
 //            String text = URLEncoder.encode(url_coords, "UTF-8");
@@ -77,19 +87,45 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
             } else {
                 br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
             }
+
             String inputLine;
             StringBuffer response = new StringBuffer();
+
             while ((inputLine = br.readLine()) != null) {
                 response.append(inputLine);
             }
             br.close();
 //                    System.out.println(response.toString());
             Log.d("HTTP body: ", response.toString());
-            result = response.toString();
+//            result = response.toString();
+
+            //JSON 파싱 확인
+            JSONObject jsonObject = new JSONObject(response.toString());
+
+//            Log.d("http, testMJ: ",jsonObject.getJSONObject("status").get("name").getClass().getName()+"");
+//            Log.d("http, testMJ: ", Integer.parseInt(jsonObject.getJSONObject("status").get("code").toString()) == 0 ? "true" : "false");
+//            Log.d("http, testMJ: ", jsonObject.getJSONObject("status").get("code").getClass().getName()+"");
+//            Log.d("http, testMJ: ", jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area1").get("name").toString());
+
+
+            if (Integer.parseInt(jsonObject.getJSONObject("status").get("code").toString().trim()) == 0){
+                result = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area1").get("name").toString() + " "
+                        + jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area2").get("name").toString() +" "
+                        + jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area3").get("name").toString();
+                Log.d("http, testMJ2: ", result);
+            } else{
+                result = "fail";
+            }
+
+
+
+
+
         } catch (Exception e) {
 //            System.out.println(e);
             Log.d("error: ", ""+e);
         }
+//        return result+","+coordText;
         return result;
     }
 
@@ -98,8 +134,22 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
         super.onPostExecute(result);
         //result -> status -> name : "invalid request" 일 땐 Toast 메세지로 다른 좌표 찍으라고 알리기
 
-        //result -> status -> name: "ok" 가 들어왔을 땐 해당 좌표 마커 찍기
+//        String[] temp = result.split(",");
+//        String addrParse = temp[0];
+//        String coordText = temp[1];
 
-        Log.d("HTTP Result : ", result);
+        //result -> status -> name: "ok" 가 들어왔을 땐 해당 좌표 마커 찍기
+        //result로 값 받아오는 것 같음
+//        Log.d("HTTP Result : ", result);
+        if (result == "fail"){
+            Toast.makeText(mainActivity.getApplicationContext(), "주소를 불러오지 못하는 장소입니다.", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(mainActivity.getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+            // 성공했을 때 여기서 UI 접근
+//            mainActivity.onLoad(result);
+        }
+
+
     }
+
 }

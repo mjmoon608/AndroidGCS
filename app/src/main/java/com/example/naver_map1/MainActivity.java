@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
 
+
     private boolean isDeleteMode = false;
 
     private final String clientId = "4eg2x03t7o";
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         map_btn1 = findViewById(R.id.map_btn1);
         map_btn2 = findViewById(R.id.map_btn2);
@@ -321,46 +323,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 touch_marker.setMap(naverMap);
 
                 // reverse geocording
-                ReverseGeocording reverseGeocording = new ReverseGeocording();
+                ReverseGeocording reverseGeocording = new ReverseGeocording(MainActivity.this);
 //                reverseGeocording.doInBackground(coords);
                 reverseGeocording.execute(coords);
+
+
 
                 //coords 파라미터 값으로 지역을 알 수 없을 땐 Toast메세지로 다른 좌표 찍어달라고 하기
 
                 //네이버 API 요청 성공적으로 받았을 때만 해당 위치에 좌표 찍기.
 
-
-//                try {
-//                    String text = URLEncoder.encode(String.format("%f,%f",latitude,longitude), "UTF-8");
-//                    String apiURL = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=" + text;
-//                    URL url = new URL(apiURL);
-//                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-//                    con.setRequestMethod("GET");
-//                    con.setRequestProperty("X-Naver-Client-Id", clientId);
-//                    con.setRequestProperty("X-Naver-Client-Secret", clientSecret);
-//                    // response 수신
-//                    int responseCode = con.getResponseCode();
-////                    System.out.println("responseCode=" + responseCode);
-//                    Log.d("HTTP 응답 코드: ", ""+responseCode);
-//                    BufferedReader br;
-//                    if (responseCode == 200) {
-//                        br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                    } else {
-//                        br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-//                    }
-//                    String inputLine;
-//                    StringBuffer response = new StringBuffer();
-//                    while ((inputLine = br.readLine()) != null) {
-//                        response.append(inputLine);
-//                    }
-//                    br.close();
-////                    System.out.println(response.toString());
-//                    Log.d("HTTP body: ", response.toString());
-//                } catch (Exception e) {
-//                    System.out.println(e);
-//                    //Log.d()
-//                }
-
+/*
+                try {
+                    String text = URLEncoder.encode(String.format("%f,%f",latitude,longitude), "UTF-8");
+                    String apiURL = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=" + text;
+                    URL url = new URL(apiURL);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("X-Naver-Client-Id", clientId);
+                    con.setRequestProperty("X-Naver-Client-Secret", clientSecret);
+                    // response 수신
+                    int responseCode = con.getResponseCode();
+//                    System.out.println("responseCode=" + responseCode);
+                    Log.d("HTTP 응답 코드: ", ""+responseCode);
+                    BufferedReader br;
+                    if (responseCode == 200) {
+                        br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    } else {
+                        br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+                    }
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
+                    while ((inputLine = br.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    br.close();
+//                    System.out.println(response.toString());
+                    Log.d("HTTP body: ", response.toString());
+                } catch (Exception e) {
+                    System.out.println(e);
+                    //Log.d()
+                }
+*/
                 touch_marker.setOnClickListener(overlay -> {
                     if (!isDeleteMode) {
                         if (touch_marker.getInfoWindow() == null) {
@@ -402,4 +406,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             isDeleteMode = false;
         }
     }
+
+//    public void onLoad(String addr){
+//        String[] recvCoords = addr.split(",");
+//        float latitude = Float.parseFloat(recvCoords[1]);
+//        float longitude = Float.parseFloat(recvCoords[2]);
+//        Marker touch_marker = new Marker();
+//        touch_marker.setPosition(new LatLng(latitude, longitude));
+//        touch_marker.setTag(latitude+"," +longitude);
+//        touch_marker.setMap(this.naverMap);
+//
+//        touch_marker.setOnClickListener(overlay -> {
+//            if (!isDeleteMode) {
+//                if (touch_marker.getInfoWindow() == null) {
+//                    infoWindow.open(touch_marker);
+//                } else {
+//                    infoWindow.close();
+//                }
+//            } else {
+//                touch_marker.setMap(null);
+//            }
+//            return true;
+//        });
+//
+//    }
 }
