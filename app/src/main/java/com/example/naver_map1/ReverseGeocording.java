@@ -147,7 +147,6 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
 //        Log.d("HTTP Result : ", result);
         if (result == "fail"){
             Toast.makeText(mainActivity.getApplicationContext(), "주소를 불러오지 못하는 장소입니다.", Toast.LENGTH_SHORT).show();
-
         }else{
             Toast.makeText(mainActivity.getApplicationContext(), result, Toast.LENGTH_SHORT).show();
             // 성공했을 때 여기서 UI 접근

@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.UiSettings;
 import com.naver.maps.map.overlay.InfoWindow;
 import com.naver.maps.map.overlay.Marker;
+import com.naver.maps.map.overlay.PolygonOverlay;
 import com.naver.maps.map.util.FusedLocationSource;
 
 import java.io.BufferedReader;
@@ -54,6 +56,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
+
 
 
     private boolean isDeleteMode = false;
@@ -84,6 +88,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Marker kunsan_myHome = new Marker();
 
     InfoWindow infoWindow = new InfoWindow();
+
+    PolygonOverlay polygonOverlay = new PolygonOverlay();
+    ArrayList<LatLng> polyCoords = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -310,12 +317,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 Marker touch_marker = new Marker();
 
+
+
+
+
+
+
 //                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
 
                 double latitude = latLng.latitude;
                 double longitude = latLng.longitude;
                 String coords = Double.toString(latitude) + ","+Double.toString(longitude);
+
 
                 Toast.makeText(getApplicationContext(), String.format("%f, %f", latitude, longitude), Toast.LENGTH_SHORT).show();
                 touch_marker.setPosition(new LatLng(latitude, longitude));
@@ -326,6 +340,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ReverseGeocording reverseGeocording = new ReverseGeocording(MainActivity.this);
 //                reverseGeocording.doInBackground(coords);
                 reverseGeocording.execute(coords);
+
+                polyCoords.add(new LatLng(latitude,longitude));
+
+//                polyCoords add 테스트용
+//                Log.d("test polyCoords: ", polyCoords.size()+"");
+//                for (int i = 0; i < polyCoords.size(); i++){
+//                    Log.d("testPolyCoords: ", polyCoords.get(i)+"");
+//                }
+
+                if(polyCoords.size() >= 3){
+                    polygonOverlay.setCoords(polyCoords);
+                    polygonOverlay.setOutlineWidth(5);
+                    polygonOverlay.setOutlineColor(Color.RED);
+                    polygonOverlay.setMap(naverMap);
+                }
 
 
 
@@ -375,6 +404,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     } else {
                         touch_marker.setMap(null);
+
                     }
                     return true;
                 });
