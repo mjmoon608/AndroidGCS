@@ -59,7 +59,11 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
 
     @Override
     protected String doInBackground(String ... coords) {
-        String coordText = coords[0];
+//        String coordText = coords[0];
+        String[] temp_coords = coords[0].split(",");
+        float temp_latitude = Float.parseFloat(temp_coords[1]);
+        float temp_longitude = Float.parseFloat(temp_coords[0]);
+        String coordText = String.format("%.6f", temp_latitude) +","+ String.format("%.6f",temp_longitude);
 
 //        coordText = "127.106363,37.372799";
 
@@ -103,7 +107,7 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
             JSONObject jsonObject = new JSONObject(response.toString());
 
 //            Log.d("http, testMJ: ",jsonObject.getJSONObject("status").get("name").getClass().getName()+"");
-//            Log.d("http, testMJ: ", Integer.parseInt(jsonObject.getJSONObject("status").get("code").toString()) == 0 ? "true" : "false");
+            Log.d("http, testMJ: ", Integer.parseInt(jsonObject.getJSONObject("status").get("code").toString()) == 0 ? "true" : "false");
 //            Log.d("http, testMJ: ", jsonObject.getJSONObject("status").get("code").getClass().getName()+"");
 //            Log.d("http, testMJ: ", jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area1").get("name").toString());
 
@@ -112,7 +116,7 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
                 result = jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area1").get("name").toString() + " "
                         + jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area2").get("name").toString() +" "
                         + jsonObject.getJSONArray("results").getJSONObject(0).getJSONObject("region").getJSONObject("area3").get("name").toString();
-                Log.d("http, testMJ2: ", result);
+//                Log.d("http, testMJ2: ", result);
             } else{
                 result = "fail";
             }
@@ -143,6 +147,7 @@ public class ReverseGeocording extends AsyncTask<String, String, String> {
 //        Log.d("HTTP Result : ", result);
         if (result == "fail"){
             Toast.makeText(mainActivity.getApplicationContext(), "주소를 불러오지 못하는 장소입니다.", Toast.LENGTH_SHORT).show();
+
         }else{
             Toast.makeText(mainActivity.getApplicationContext(), result, Toast.LENGTH_SHORT).show();
             // 성공했을 때 여기서 UI 접근

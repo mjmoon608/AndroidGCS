@@ -329,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
+
                 //coords 파라미터 값으로 지역을 알 수 없을 땐 Toast메세지로 다른 좌표 찍어달라고 하기
 
                 //네이버 API 요청 성공적으로 받았을 때만 해당 위치에 좌표 찍기.
