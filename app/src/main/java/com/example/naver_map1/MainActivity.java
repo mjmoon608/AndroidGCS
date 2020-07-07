@@ -1,7 +1,5 @@
 package com.example.naver_map1;
 
-import com.example.naver_map1.ReverseGeocording;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AlertDialog;
@@ -23,21 +21,11 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.naver.maps.geometry.LatLng;
-import com.naver.maps.geometry.LatLngBounds;
-import com.naver.maps.map.CameraAnimation;
-import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.LocationTrackingMode;
 import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
-import com.naver.maps.map.NaverMapSdk;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.UiSettings;
 import com.naver.maps.map.overlay.InfoWindow;
@@ -45,22 +33,8 @@ import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.PolygonOverlay;
 import com.naver.maps.map.util.FusedLocationSource;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -82,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Button map_btn3;
     ToggleButton map_toggle1;
     ToggleButton marker_delete_toggle;
+    Button poly_delete;
+    Button webview_intent_btn;
 
     Marker kunsan_Uni = new Marker();
     Marker kunsan_cityHall = new Marker();
@@ -89,13 +65,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     InfoWindow infoWindow = new InfoWindow();
 
+    Marker touch_marker = new Marker();
+    int marker_index = 0;
+
     PolygonOverlay polygonOverlay = new PolygonOverlay();
     ArrayList<LatLng> polyCoords = new ArrayList<>();
+    ArrayList<Marker> markers = new ArrayList<Marker>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent go_webview_activity = new Intent(this, NaverMapView.class);
+
+
 
 
         map_btn1 = findViewById(R.id.map_btn1);
@@ -103,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         map_btn3 = findViewById(R.id.map_btn3);
         map_toggle1 = findViewById(R.id.map_toggle1);
         marker_delete_toggle = findViewById(R.id.marker_delete);
+        poly_delete = findViewById(R.id.poly_delete_btn);
+        webview_intent_btn = findViewById(R.id.mapview_intent);
 
 
 
@@ -171,6 +157,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     map_btn2.setVisibility(View.INVISIBLE);
                     naverMap.setMapType(NaverMap.MapType.Hybrid);
                 }
+            }
+        });
+
+        poly_delete.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                polyCoords.clear();
+                polygonOverlay.setMap(null);
+                markers.clear();
+            }
+        });
+
+        webview_intent_btn.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                startActivity(go_webview_activity);
             }
         });
 
@@ -315,7 +317,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
-                Marker touch_marker = new Marker();
+//                Marker touch_marker = new Marker();
+
+
+
+
 
 
 
@@ -334,12 +340,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(getApplicationContext(), String.format("%f, %f", latitude, longitude), Toast.LENGTH_SHORT).show();
                 touch_marker.setPosition(new LatLng(latitude, longitude));
                 touch_marker.setTag(String.format("%f, %f", latitude, longitude));
+                markers.add(touch_marker);
                 touch_marker.setMap(naverMap);
 
                 // reverse geocording
                 ReverseGeocording reverseGeocording = new ReverseGeocording(MainActivity.this);
 //                reverseGeocording.doInBackground(coords);
                 reverseGeocording.execute(coords);
+
+
+
 
                 polyCoords.add(new LatLng(latitude,longitude));
 
@@ -404,11 +414,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     } else {
                         touch_marker.setMap(null);
-
                     }
                     return true;
                 });
-
+                marker_index++;
             }
         });
 
