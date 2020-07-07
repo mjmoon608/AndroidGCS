@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Button map_btn2;
     Button map_btn3;
     ToggleButton map_toggle1;
-    ToggleButton marker_delete_toggle;
+//    ToggleButton marker_delete_toggle;
     Button poly_delete;
     Button webview_intent_btn;
 
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     InfoWindow infoWindow = new InfoWindow();
 
-    Marker touch_marker = new Marker();
+//    Marker touch_marker = new Marker();
     int marker_index = 0;
 
     PolygonOverlay polygonOverlay = new PolygonOverlay();
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         map_btn2 = findViewById(R.id.map_btn2);
         map_btn3 = findViewById(R.id.map_btn3);
         map_toggle1 = findViewById(R.id.map_toggle1);
-        marker_delete_toggle = findViewById(R.id.marker_delete);
+//        marker_delete_toggle = findViewById(R.id.marker_delete);
         poly_delete = findViewById(R.id.poly_delete_btn);
         webview_intent_btn = findViewById(R.id.mapview_intent);
 
@@ -165,7 +165,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 polyCoords.clear();
                 polygonOverlay.setMap(null);
+                for(int i = 0 ; i<markers.size() ; i++){
+                    markers.get(i).setMap(null);
+                }
                 markers.clear();
+                marker_index = 0;
             }
         });
 
@@ -317,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
-//                Marker touch_marker = new Marker();
+                Marker touch_marker = new Marker();
 
 
 
@@ -340,13 +344,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(getApplicationContext(), String.format("%f, %f", latitude, longitude), Toast.LENGTH_SHORT).show();
                 touch_marker.setPosition(new LatLng(latitude, longitude));
                 touch_marker.setTag(String.format("%f, %f", latitude, longitude));
+//                markers.get(marker_index).setPosition(new LatLng(latitude, longitude));
+//                markers.get(marker_index).setTag(String.format("%f, %f", latitude, longitude));
                 markers.add(touch_marker);
-                touch_marker.setMap(naverMap);
+                markers.get(marker_index).setMap(naverMap);
 
                 // reverse geocording
                 ReverseGeocording reverseGeocording = new ReverseGeocording(MainActivity.this);
 //                reverseGeocording.doInBackground(coords);
                 reverseGeocording.execute(coords);
+//
+//                if (markers.size() == 0){
+//                    for(int i = 0 ; i<markers.size() ; i++){
+//                        markers.get(i).setMap(null);
+//                    }
+//                }
 
 
 
@@ -405,18 +417,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     //Log.d()
                 }
 */
-                touch_marker.setOnClickListener(overlay -> {
-                    if (!isDeleteMode) {
-                        if (touch_marker.getInfoWindow() == null) {
-                            infoWindow.open(touch_marker);
-                        } else {
-                            infoWindow.close();
-                        }
-                    } else {
-                        touch_marker.setMap(null);
-                    }
-                    return true;
-                });
+//                touch_marker.setOnClickListener(overlay -> {
+//                    if (!isDeleteMode) {
+//                        if (touch_marker.getInfoWindow() == null) {
+//                            infoWindow.open(touch_marker);
+//                        } else {
+//                            infoWindow.close();
+//                        }
+//                    } else {
+//                        touch_marker.setMap(null);
+//                    }
+//                    return true;
+//                });
                 marker_index++;
             }
         });
