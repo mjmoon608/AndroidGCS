@@ -35,6 +35,9 @@ import com.naver.maps.map.util.FusedLocationSource;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -365,13 +368,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 polyCoords.add(new LatLng(latitude,longitude));
 
+
+                
+
 //                polyCoords add 테스트용
 //                Log.d("test polyCoords: ", polyCoords.size()+"");
 //                for (int i = 0; i < polyCoords.size(); i++){
 //                    Log.d("testPolyCoords: ", polyCoords.get(i)+"");
 //                }
-
+                QuickHullLatLng quickHullLatLng = new QuickHullLatLng(polyCoords);
+                Log.d("polyCoords: ", polyCoords+"");
                 if(polyCoords.size() >= 3){
+                    quickHullLatLng.quickHull(polyCoords);
+
                     polygonOverlay.setCoords(polyCoords);
                     polygonOverlay.setOutlineWidth(5);
                     polygonOverlay.setOutlineColor(Color.RED);
